@@ -52,10 +52,10 @@ anchorjs: true # if you want to customize anchor. check out line:181 of `post.ht
 
 # Analytics settings
 # Baidu Analytics
-# ba_track_id:
+ba_track_id: 'e03d9cebfdf156f9569ec25fc546af69'
 # Google Analytics
-ga_track_id: 'UA-XXXXXXXX-X' # Format: UA-xxxxxx-xx
-ga_domain: yoursite
+# ga_track_id: 'UA-XXXXXXXX-X' # Format: UA-xxxxxx-xx
+# ga_domain: yoursite
 
 
 # Sidebar settings

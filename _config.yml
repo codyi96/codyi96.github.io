@@ -83,6 +83,10 @@ featured-condition-size: 1              # A tag will be featured if the size of 
 
 ## Friends
 friends: [
+  {
+    title: "Leetcode",
+    href: "https://codyi96.gitbook.io/leetcode/"
+  }
 ]
 
 

@@ -15,7 +15,7 @@ tags: 探索
 
 眼看着阿里云学生机的羊毛就要薅到头了，就想着搭个`免费`的个人博客玩玩，顺便沉淀下日常所学和踩过的坑。调研了一下网上说的比较多的就属`GitBook`和`GitPage`了，正好都没玩过，趁着假期可以好好把玩一番。🛴
 
-<br>
+<p></p>
 
 需要注意的是，GitBook在2018.04.09发布了全新的1.0版本，同时迁移了旧版本数据。由于此次变动较大，网上的教程大多不可用，本文未及之处还请参阅[官方文档](https://docs.gitbook.com/)。
 
@@ -25,11 +25,11 @@ tags: 探索
 
 以上是官网对于GitBook的定义，简单来说，[GitBook](https://www.gitbook.com/)是一款基于Git和Markdown的书本编排系统。
 
-<br>
+<p></p>
 
 GitBook提供了多种使用姿势，但是不管哪种都需要先在官网注册，当然，你可以选择使用谷歌账号或GitHub账号快速注册。
 
-<br>
+<p></p>
 
 下面讲一下常用的两种：控制台方式和GitHub方式。
 
@@ -148,15 +148,15 @@ gitbook serve
 
 根本原因：官方废弃了[CLI工具](https://docs.gitbook.com/v2-changes/important-differences#cli-toolchain)，导致了目前CLI工具的处理逻辑与远端处理不同。
 
-<br>
+<p></p>
 
 首先明确一点，在线调试实际上会首先调用`gitbook build`编译书本，使用的是本地编译；而推送commit到GitHub仓库，由GitBook同步并编译，使用的是远端编译。
 
-<br>
+<p></p>
 
 二者主要区别在于：本地编译参考`book.json`中的配置，而远端编译参考的是控制台的配置，即使你将本地`book.json`提交到GitHub也无济于事。
 
-<br>
+<p></p>
 
 这就导致了本地调试的预览效果与最终效果`不一致`！
 

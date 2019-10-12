@@ -11,7 +11,7 @@ timezone:
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-# url: http://codyi96.github.io/ # Note: don't forget to modify the CNAME file to your url
+url: https://codyi96.github.io/ # Note: don't forget to modify the CNAME file to your url
 # root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults:
@@ -54,8 +54,8 @@ anchorjs: true # if you want to customize anchor. check out line:181 of `post.ht
 # Baidu Analytics
 ba_track_id: 'e03d9cebfdf156f9569ec25fc546af69'
 # Google Analytics
-# ga_track_id: 'UA-XXXXXXXX-X' # Format: UA-xxxxxx-xx
-# ga_domain: yoursite
+ga_track_id: 'UA-149875502-1'
+ga_domain: 'auto'
 
 
 # Sidebar settings

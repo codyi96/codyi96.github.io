@@ -42,7 +42,7 @@ anchorjs: true # if you want to customize anchor. check out line:181 of `post.ht
 
 
 # Disqus settings
-# disqus_username: your-disqus-ID
+disqus_shortname: codyi96
 
 # Duoshuo settings
 # duoshuo_username:

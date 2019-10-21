@@ -69,7 +69,7 @@ layout: layout
                 <!-- 多说评论框 end -->
 
                 <!-- disqus comment start -->
-                <% if(config['disqus_username']) { %>
+                <% if(config['disqus_shortname']) { %>
                     <div class="comment">
                         <div id="disqus_thread" class="disqus-thread"></div>
                     </div>
@@ -135,11 +135,11 @@ layout: layout
 <!-- 多说公共JS代码 end -->
 <% } %>
 
-<% if(config['disqus_username']) { %>
+<% if(config['disqus_shortname']) { %>
 <!-- disqus embedded js code start (one page only need to embed once) -->
 <script type="text/javascript">
     /* * * CONFIGURATION VARIABLES * * */
-    var disqus_shortname = "<%= config['disqus_username'] %>";
+    var disqus_shortname = "<%= config['disqus_shortname'] %>";
     var disqus_identifier = "<%= page.permalink %>";
     var disqus_url = "<%= page.permalink %>";
 

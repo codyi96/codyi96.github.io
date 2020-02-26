@@ -1,12 +1,12 @@
 ---
-title: 从源码构建React Native
+title: React Native源码构建
 catalog: true
 date: 2020-02-16 21:30:41
 subtitle:
 header-img: nature-animals.jpg
 tags:
 - react-native
-- 构建
+- 源码构建
 ---
 
 # 写在前面

@@ -6,6 +6,7 @@
     "version": "3.9.0"
   },
   "scripts": {
+    "new": "hexo new \"new-post\"",
     "build": "hexo clean && hexo g",
     "push": "hexo clean && hexo g && hexo d"
   },

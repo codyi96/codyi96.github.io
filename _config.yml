@@ -166,7 +166,7 @@ sitemap:
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repository: git@github.com:codyi96/codyi96.github.io.git
+  repository: https://M_GITHUB_PAGES_TOKEN@github.com/codyi96/codyi96.github.io.git
   branch: master
 
 # Live2D

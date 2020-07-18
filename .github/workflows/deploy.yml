@@ -1,0 +1,33 @@
+name: Compile and Deploy to GitHub Page
+
+on:
+  push:
+    branches:
+      - source
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+        ref: refs/heads/source
+
+    - uses: actions/setup-node@v1
+      with:
+        node_version: '8.x'
+
+    - name: Setup Git user info and env
+      env:
+        M_GITHUB_PAGES_TOKEN: ${{ secrets.M_GITHUB_PAGES_TOKEN }}
+      run: |
+        git config --global user.email "471705439@qq.com"
+        git config --global user.name "codyi96"
+        sed -i "s/M_GITHUB_PAGES_TOKEN/$M_GITHUB_PAGES_TOKEN/g" ./_config.yml
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Compile and deploy blog
+      run: npm run push

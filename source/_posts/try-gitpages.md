@@ -13,13 +13,13 @@ tags: 探索
 # 配置GitHub Pages
 1. 创建一个新的Repository
 <div align="center">
-    <img src="./try-gitpages/create_pages_1.png" width="80%" />
+    <img src="create_pages_1.png" width="80%" />
 </div>
 注意：Repository Name需采用固定格式: Github用户名.github.io
 
 2. 配置Repository
 <div align="center">
-    <img src="./try-gitpages/create_pages_2.png" width="80%" />
+    <img src="create_pages_2.png" width="80%" />
 </div>
 进入Repository主页 -> Settings -> Options -> GitHub Pages
 
@@ -66,7 +66,7 @@ tags: 探索
     - hexo clean && hexo g && hexo d
 
 <div align="center">
-    <img src="./try-gitpages/hexo_setting_1.png" width="80%" />
+    <img src="hexo_setting_1.png" width="80%" />
 </div>
 
 稍等片刻，待Repository主页提示构建成功后，访问GitHub Pages页面即可看到效果。
@@ -76,7 +76,7 @@ tags: 探索
 ## 访问统计
 使用[不蒜子](https://busuanzi.ibruce.info/)实现访客人数统计
 <div align="center">
-    <img src="./try-gitpages/hexo_setting_2.jpg" width="80%" />
+    <img src="hexo_setting_2.jpg" width="80%" />
 </div>
 在`themes/landscape/layout/_partial/footer.ejs`文件中添加如下代码即可:
 ```javascript

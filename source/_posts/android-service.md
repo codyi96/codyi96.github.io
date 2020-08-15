@@ -53,11 +53,42 @@ tags: Android
 ### 前台服务的启动
 前台服务一般需要先通过`startForegroundService()`启动一个后台服务，同时该方法向系统发送信号，表明服务将会自行提升前台。启动服务后，该服务需要在`五秒内`调用自己的`startForeground()`方法显式提升服务至前台。而正是这个`startForeground()`方法，唤起了本文开头的那个烦人的系统通知。
 
-### 前台服务与通知栏
+PS. 通过`startService()`启动的服务，如果调用了`startForeground()`方法，也将升级为前台服务。但是这种用法容易给人造成误解，极不推荐使用
 
-# 案例
+### 前台服务与通知栏
+当应用在后台时，前台服务中的`startForeground()`方法将唤起一个通知栏。
+我们知道，在高版本中系统通知必须寄宿于某个渠道之下，如果此时（指`startForeground()`调用时刻）该渠道未被授予通知权限甚至渠道还未创建完毕，系统会先采用默认的通知提示，即显示`xx应用正在后台运行`的系统通知栏，这个通知栏拥有一个特殊的notifyID，与`startForeground()`方法中传入的notifyID不同。如果渠道已获得授权，将展示用户传给`startForeground()`方法的通知信息。
+顺便一提，在渠道未被授权或未创建完毕的情况下，使用`NotificationManager.notify()`将不会有任何响应。
 
 # 隐藏前台服务通知栏
+在介绍具体方案之前，不妨先思考一个问题：如果前台服务中调用了`NotificationManager.notify()`方法，会怎么样？很简单，如果`notify()`传入的`notifyID`和`startForeground()`传入的一致，那么将合并显示；反之，将会分别展示两个通知栏。
+至此，隐藏前台服务通知栏的方案应该比较清晰了：通过一个前台服务类作为跳板，用其启动真实的服务，即其他组件启动跳板前台服务，跳板服务启动真实服务。
+```java
+// 跳板服务
+public class RouteForegroundService extends Service {
+    ...
+    @Override
+    public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
+        createNotificationChannel(this, CHANNELID, CHANNELNAME);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mBuilder = new Notification.Builder(this, CHANNELID)
+                    .setSmallIcon(R.drawable.ic_launcher_background)
+                    .setContentText("我是跳板服务");
+            startForeground(NOTIFY_ID, mBuilder.build());
+        }
+        MyService.start(this); // 启动真实服务
+        stopSelf(); // 自杀
+        return super.onStartCommand(intent, flags, startId);
+    }
+}
+```
+上述代码以最简单的方式展示了跳板服务的逻辑。在启动真实服务之后，跳板服务完成使命，调用`stopSelf()`关闭前台通知栏，实现前台服务通知栏的“隐藏”（由于碎片化，部分机型会短暂展示）。
+如果在真实服务中需要`notify()`，可以设定与跳板服务一致的notifyID，进一步降低用户对前台服务通知栏的感知。
+
+> 如果有多个服务需要采用此类方案，那么应该将跳转服务抽象为一个工具类，将需要启动的真实服务类及启动参数通过Intent传入跳板服务，并在跳板服务中解析参数以启动真实服务，而不是简单地调用`MyService.start()`，这里不再展开。
+
+# 碎片化
+相同固件版本下，不同手机对通知渠道的授权行为可能会不一致，一些手机（如OnePlus 6）在创建渠道时会默认开启，而一些手机则不会。同时，一些手机（还是OnePlus 6）即使关闭渠道，也不会出现`xx应用正在后台运行`通知。
 
 # 参考资料
 1. [服务概览](https://developer.android.com/guide/components/services)

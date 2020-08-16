@@ -42,8 +42,8 @@ public class Act2 extends Activity {
 }
 ```
 上面的代码定义了两个页面，每个页面都展示了一个图片。不同的是，第一个页面使用着色器为图片涂上了黑色。
-效果如下：
-<div align="center">
+效果如下:
+<div style="display:flex">
     <img src="appearance.gif" width="50%" title="先启动页面一，后启动页面二" />
     <img src="appearance-2.gif" width="50%" title="先启动页面二，后启动页面一" />
 </div>

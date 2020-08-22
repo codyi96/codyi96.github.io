@@ -22,7 +22,7 @@ tags:
 # 问题
 React Native应用在一些国产机上出现启动崩溃，崩溃日志大致如下:
 
-```
+```log
 java.lang.UnsatisfiedLinkError: couldn't find DSO to load: libreactnativejni.so
     caused by: couldn't find DSO to load: libglog_init.so
     caused by: couldn't find DSO to load: libglog.so

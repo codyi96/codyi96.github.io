@@ -1,3 +1,5 @@
+![](https://github.com/codyi96/codyi96.github.io/workflows/Compile%20and%20Deploy%20to%20GitHub%20Page/badge.svg)
+
 ### Todo
 
 - [x] 支持访客统计

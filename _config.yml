@@ -84,8 +84,16 @@ featured-condition-size: 1              # A tag will be featured if the size of 
 ## Friends
 friends: [
   {
+    title: "弱鸡的填坑之旅",
+    href: "https://zhuanlan.zhihu.com/c_154978159"
+  },
+  {
     title: "Leetcode",
     href: "https://codyi96.gitbook.io/leetcode/"
+  },
+  {
+    title: "vercel镜像站",
+    href: "https://codyi.vercel.app/"
   }
 ]
 

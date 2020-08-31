@@ -3,7 +3,7 @@ title: ndk crash - cannot locate symbol "__register_atfork"
 catalog: true
 date: 2020-08-30 20:36:21
 subtitle:
-header-img: head.jpg
+header-img: header.jpg
 tags:
 - Android
 - ndk

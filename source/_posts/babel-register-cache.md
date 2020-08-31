@@ -3,7 +3,7 @@ title: babel-register源码浅析
 catalog: true
 date: 2020-08-23 23:21:51
 subtitle:
-header-img: head.jpg
+header-img: header.jpg
 tags:
 - babel
 - 源码分析

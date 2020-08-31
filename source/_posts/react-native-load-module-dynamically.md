@@ -3,7 +3,7 @@ title: React Native 模块动态加载的一些思考
 catalog: true
 date: 2020-08-16 20:42:57
 subtitle:
-header-img: head.png
+header-img: header.jpg
 tags:
 - react-native
 ---

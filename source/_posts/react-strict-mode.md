@@ -3,7 +3,7 @@ title: React 严格模式
 catalog: true
 date: 2020-08-30 18:26:34
 subtitle:
-header-img: head.jpg
+header-img: header.jpg
 tags:
 - React
 ---

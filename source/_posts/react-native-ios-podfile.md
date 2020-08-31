@@ -3,7 +3,7 @@ title: React Native iOS Podfile
 catalog: true
 date: 2020-08-30 19:10:49
 subtitle:
-header-img: head.jpg
+header-img: header.jpg
 tags:
 - react-native
 - iOS

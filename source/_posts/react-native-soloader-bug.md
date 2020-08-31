@@ -3,7 +3,7 @@ title: React Native踩坑简录·SoLoader
 catalog: true
 date: 2020-08-23 00:26:49
 subtitle:
-header-img: head.jpg
+header-img: header.jpg
 tags:
 - react-native
 - bug

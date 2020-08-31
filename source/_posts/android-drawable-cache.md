@@ -3,7 +3,7 @@ title: Android Drawable 缓存浅析
 catalog: true
 date: 2020-08-16 01:05:28
 subtitle:
-header-img: head.jpg
+header-img: header.jpg
 tags:
 - Android
 - Android Drawable

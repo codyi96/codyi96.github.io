@@ -3,7 +3,7 @@ title: GitBook安装与使用
 catalog: true
 date: 2019-10-06 11:18:36
 subtitle:
-header-img: sky.jpg
+header-img: header.jpg
 tags: 探索
 ---
 

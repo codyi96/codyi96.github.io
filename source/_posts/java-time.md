@@ -54,7 +54,7 @@ calendar.setTimeZone(TimeZone.getTimeZone("GMT+1"));
 System.out.println("东1区时间:" + calendar.get(Calendar.HOUR_OF_DAY) + "时"); // 东1区时间:17时
 ```
 
-## DateFormat
+### DateFormat
 [DateFormat](https://docs.oracle.com/javase/7/docs/api/java/text/DateFormat.html)用来做时间和字符串之间的转换，可以通过`DateFormat.getDateInstance()`、`DateFormat.getTimeInstance()`等方式获取实例。一般情况下，我们更倾向于直接使用[SimpleDateFormat](https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html):
 
 ```java

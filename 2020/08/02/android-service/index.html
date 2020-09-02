@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="0ZKwzX9LFUedBOuH61yLAYOYxWTCaei4OCp1kVJHHYU">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/gingerbread_man.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <title>
+        
+          Android前台服务 - Foreground Service - 渺沧海之一粟
+        
+    </title>
+
+    <link rel="canonical" href="https://codyi96.github.io/2020/08/02/android-service/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS --> 
+    <link rel="stylesheet" href="/css/beantech.min.css">
+    
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <link rel="stylesheet" href="/css/widget.css">
+
+    <link rel="stylesheet" href="/css/rocket.css">
+
+    <link rel="stylesheet" href="/css/signature.css">
+
+    <link rel="stylesheet" href="/css/toc.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            background-image: url('header.jpg')
+            /*post*/
+        
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#Android" title="Android">Android</a>
+                            
+                              <a class="tag" href="/tags/#Android Service" title="Android Service">Android Service</a>
+                            
+                        </div>
+                        <h1>Android前台服务 - Foreground Service</h1>
+                        <h2 class="subheading"></h2>
+                        <span class="meta">
+                            Posted by Codyi96 on
+                            2020-08-02
+                        </span>
+                    </div>
+                
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Codyi96</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Modify by Yu-Hsuan Yen -->
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="概述">概述</h1>
+<p>本文将回顾<code>服务</code>的相关知识和使用案例，以及如何隐藏由前台服务创建的通知栏</p>
+<div align="center">
+    <img src="summary.jpg" width="80%">
+</div>
+<h1 id="服务">服务</h1>
+<p><code>Service</code>是一种可在后台<code>长时间运行</code>的<code>无界面</code>应用组件。</p>
+<div align="center">
+    <img src="service_lifecycle.png" width="80%" title="Service生命周期">
+</div>
+<h2 id="服务的种类">服务的种类</h2>
+<p>按照运行现象，可以将服务分为前台服务和后台服务；按照启动方式，又可以将服务分为启动服务和绑定服务。值得一提的是，一个服务类既可以支持启动服务，同时也可以支持绑定，只要实现相应的回调方法即可：<code>onStartCommand()</code>（启动服务）和<code>onBind()</code>（绑定服务）。</p>
+<h2 id="服务的特征">服务的特征</h2>
+<ol>
+<li>服务在应用进程的<code>主线程执行</code>，启动或绑定服务并不会创建自己的线程，也不会在单独的进程中执行（除非另行指定）。因此，耗时操作应当在服务中创建新的线程来完成，否则容易ANR</li>
+<li>启动服务一旦启动，就会<code>无限期运行</code>，直到其调用<code>stopSelf()</code>自行停止或其他组件调用<code>stopServicec()</code>将其停止</li>
+<li>在系统资源不足时，系统会根据优先级主动停止服务。其中<code>前台服务</code>拥有较高优先级，一般不会被停止，而<code>后台服务</code>的优先级则与运行时间有关，长时间运行的服务被停止的概率更高。同时，如果服务是由于资源不足而被系统停止，那么在系统资源满足的情况下，服务将被系统重启</li>
+<li><code>stopSelf()</code>和<code>stopServicec()</code>并不是将服务立即结束，仅是通知系统尽快销毁而已</li>
+</ol>
+<h2 id="服务基类">服务基类</h2>
+<p>自定义服务可以继承以下两个基类</p>
+<h3 id="service">Service</h3>
+<p>适用于所有服务。继承该基类时，服务中的业务操作必须创建新线程执行，因为服务默认使用应用的主线程，这会降低应用正在运行的Activity的性能甚至导致ANR</p>
+<h3 id="intentservice自api-30已废弃">IntentService（👎自API 30已废弃）</h3>
+<p>继承该基类时，服务会自动创建线程来处理每一个到来的Intent，且会在处理完所有Intent后自动停止服务，而无需使用者手动调用<code>stopSelf()</code>。<br>
+值得注意的是，自定义服务时不应重写<code>onStartCommand()</code>方法，否则可能会导致<code>onHandleIntent()</code>无法正常响应</p>
+<h2 id="前台服务">前台服务</h2>
+<p>自Android 8.0（API 26）开始，Android系统开始执行严格的<a href="https://developer.android.com/about/versions/oreo/background" target="_blank" rel="noopener">后台执行限制</a>，后台应用不允许默默启动后台服务，只能启动前台服务，而前台应用则可以自由创建前台服务和后台服务。应用进入后台时，有一个持续数分钟的窗口期，在窗口期内仍然可以创建和使用前台/后台Service。窗口期结束后，应用被视为处于空闲状态，系统将停止应用的后台Service，就像服务调用了自己的<code>stopSelf()</code>方法一样。</p>
+<h3 id="后台应用的定义">后台应用的定义</h3>
+<p>何为后台应用？🤔</p>
+<blockquote>
+<p>如果满足以下任意条件，应用将被视为处于前台：</p>
+<ul>
+<li>具有可见 Activity（不管该 Activity 已启动还是已暂停）</li>
+<li>具有前台 Service</li>
+<li>另一个前台应用已关联到该应用（不管是通过绑定到其中一个 Service，还是通过使用其中一个内容提供程序）。例如，如果另一个应用绑定到该应用的 Service，那么该应用处于前台：
+<ul>
+<li>IME</li>
+<li>壁纸 Service</li>
+<li>通知侦听器</li>
+<li>语音或文本 Service</li>
+</ul>
+</li>
+</ul>
+<p>如果以上条件均不满足，应用将被视为处于后台。</p>
+</blockquote>
+<h3 id="前台服务的启动">前台服务的启动</h3>
+<p>前台服务一般需要先通过<code>startForegroundService()</code>启动一个后台服务，同时该方法向系统发送信号，表明服务将会自行提升前台。启动服务后，该服务需要在<code>五秒内</code>调用自己的<code>startForeground()</code>方法显式提升服务至前台。而正是这个<code>startForeground()</code>方法，唤起了本文开头的那个烦人的系统通知。</p>
+<p>PS. 通过<code>startService()</code>启动的服务，如果调用了<code>startForeground()</code>方法，也将升级为前台服务。但是这种用法容易给人造成误解，极不推荐使用</p>
+<h3 id="前台服务与通知栏">前台服务与通知栏</h3>
+<p>当应用在后台时，前台服务中的<code>startForeground()</code>方法将唤起一个通知栏。<br>
+我们知道，在高版本中系统通知必须寄宿于某个渠道之下，如果此时（指<code>startForeground()</code>调用时刻）该渠道未被授予通知权限甚至渠道还未创建完毕，系统会先采用默认的通知提示，即显示<code>xx应用正在后台运行</code>的系统通知栏，这个通知栏拥有一个特殊的notifyID，与<code>startForeground()</code>方法中传入的notifyID不同。如果渠道已获得授权，将展示用户传给<code>startForeground()</code>方法的通知信息。<br>
+顺便一提，在渠道未被授权或未创建完毕的情况下，使用<code>NotificationManager.notify()</code>将不会有任何响应。</p>
+<h1 id="隐藏前台服务通知栏">隐藏前台服务通知栏</h1>
+<p>在介绍具体方案之前，不妨先思考一个问题：如果前台服务中调用了<code>NotificationManager.notify()</code>方法，会怎么样？很简单，如果<code>notify()</code>传入的<code>notifyID</code>和<code>startForeground()</code>传入的一致，那么将合并显示；反之，将会分别展示两个通知栏。<br>
+至此，隐藏前台服务通知栏的方案应该比较清晰了：通过一个前台服务类作为跳板，用其启动真实的服务，即其他组件启动跳板前台服务，跳板服务启动真实服务。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 跳板服务</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RouteForegroundService</span> <span class="keyword">extends</span> <span class="title">Service</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">onStartCommand</span><span class="params">(@Nullable Intent intent, <span class="keyword">int</span> flags, <span class="keyword">int</span> startId)</span> </span>&#123;</span><br><span class="line">        createNotificationChannel(<span class="keyword">this</span>, CHANNELID, CHANNELNAME);</span><br><span class="line">        <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.O) &#123;</span><br><span class="line">            mBuilder = <span class="keyword">new</span> Notification.Builder(<span class="keyword">this</span>, CHANNELID)</span><br><span class="line">                    .setSmallIcon(R.drawable.ic_launcher_background)</span><br><span class="line">                    .setContentText(<span class="string">"我是跳板服务"</span>);</span><br><span class="line">            startForeground(NOTIFY_ID, mBuilder.build());</span><br><span class="line">        &#125;</span><br><span class="line">        MyService.start(<span class="keyword">this</span>); <span class="comment">// 启动真实服务</span></span><br><span class="line">        stopSelf(); <span class="comment">// 自杀</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">super</span>.onStartCommand(intent, flags, startId);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上述代码以最简单的方式展示了跳板服务的逻辑。在启动真实服务之后，跳板服务完成使命，调用<code>stopSelf()</code>关闭前台通知栏，实现前台服务通知栏的“隐藏”（由于碎片化，部分机型会短暂展示）。<br>
+如果在真实服务中需要<code>notify()</code>，可以设定与跳板服务一致的notifyID，进一步降低用户对前台服务通知栏的感知。</p>
+<blockquote>
+<p>如果有多个服务需要采用此类方案，那么应该将跳转服务抽象为一个工具类，将需要启动的真实服务类及启动参数通过Intent传入跳板服务，并在跳板服务中解析参数以启动真实服务，而不是简单地调用<code>MyService.start()</code>，这里不再展开。</p>
+</blockquote>
+<h1 id="碎片化">碎片化</h1>
+<p>相同固件版本下，不同手机对通知渠道的授权行为可能会不一致，一些手机（如OnePlus 6）在创建渠道时会默认开启，而一些手机则不会。同时，一些手机（还是OnePlus 6）即使关闭渠道，也不会出现<code>xx应用正在后台运行</code>通知。</p>
+<h1 id="参考资料">参考资料</h1>
+<ol>
+<li><a href="https://developer.android.com/guide/components/services" target="_blank" rel="noopener">服务概览</a></li>
+<li><a href="https://developer.android.com/about/versions/oreo/background" target="_blank" rel="noopener">后台执行限制</a></li>
+<li><a href="https://developer.android.com/reference/android/app/IntentService" target="_blank" rel="noopener">IntentService</a></li>
+</ol>
+
+                
+
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2020/08/16/android-drawable-cache/" data-toggle="tooltip" data-placement="top" title="Android Drawable 缓存浅析">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2020/07/19/try-gitpages/" data-toggle="tooltip" data-placement="top" title="GitHub Pages+Hexo+Action搭建个人博客">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                <!-- duoshuo Share start -->
+                
+                <!-- 多说 Share end-->
+
+                <!-- 多说评论框 start -->
+                
+                <!-- 多说评论框 end -->
+
+                <!-- disqus comment start -->
+                
+                    <div class="comment">
+                        <div id="disqus_thread" class="disqus-thread"></div>
+                    </div>
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      <aside id="sidebar">
+        <div id="toc" class="toc-article">
+        <strong class="toc-title">Contents</strong>
+        
+          <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#概述"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">概述</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#服务"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">服务</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#服务的种类"><span class="toc-nav-number">2.1.</span> <span class="toc-nav-text">服务的种类</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#服务的特征"><span class="toc-nav-number">2.2.</span> <span class="toc-nav-text">服务的特征</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#服务基类"><span class="toc-nav-number">2.3.</span> <span class="toc-nav-text">服务基类</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#service"><span class="toc-nav-number">2.3.1.</span> <span class="toc-nav-text">Service</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#intentservice自api-30已废弃"><span class="toc-nav-number">2.3.2.</span> <span class="toc-nav-text">IntentService（👎自API 30已废弃）</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#前台服务"><span class="toc-nav-number">2.4.</span> <span class="toc-nav-text">前台服务</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#后台应用的定义"><span class="toc-nav-number">2.4.1.</span> <span class="toc-nav-text">后台应用的定义</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#前台服务的启动"><span class="toc-nav-number">2.4.2.</span> <span class="toc-nav-text">前台服务的启动</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#前台服务与通知栏"><span class="toc-nav-number">2.4.3.</span> <span class="toc-nav-text">前台服务与通知栏</span></a></li></ol></li></ol></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#隐藏前台服务通知栏"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">隐藏前台服务通知栏</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#碎片化"><span class="toc-nav-number">4.</span> <span class="toc-nav-text">碎片化</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#参考资料"><span class="toc-nav-number">5.</span> <span class="toc-nav-text">参考资料</span></a></li></ol>
+        
+        </div>
+      </aside>
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#Android" title="Android">Android</a>
+                        
+                          <a class="tag" href="/tags/#Android Service" title="Android Service">Android Service</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="https://zhuanlan.zhihu.com/c_154978159" target="_blank">弱鸡的填坑之旅</a></li>
+                    
+                        <li><a href="https://codyi96.gitbook.io/leetcode/" target="_blank">Leetcode</a></li>
+                    
+                        <li><a href="https://codyi.vercel.app/" target="_blank">vercel镜像站</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- disqus embedded js code start (one page only need to embed once) -->
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = "codyi96";
+    var disqus_identifier = "https://codyi96.github.io/2020/08/02/android-service/";
+    var disqus_url = "https://codyi96.github.io/2020/08/02/android-service/";
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<!-- disqus embedded js code start end -->
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: '☄️'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/a-hey-59">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="http://weibo.com/2909212740">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/codyi96">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Codyi96 2020 
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    re-Ported by <a href="http://beantech.org">BeanTech</a> | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://img.shields.io/github/stars/codyi96/codyi96.github.io?style=social" >
+                    </iframe>
+                </p>
+                <p class="copyright text-muted">
+                    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+                    <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://codyi96.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+    <script>
+        var _gaId = 'UA-149875502-1';
+        var _gaDomain = 'auto';
+
+        // Originial
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+        ga('create', _gaId, _gaDomain);
+        ga('send', 'pageview');
+    </script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = 'e03d9cebfdf156f9569ec25fc546af69';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+<!-- Image to hack wechat -->
+<!-- <img src="https://codyi96.github.io/img/icon_wechat.jpeg" width="0" height="0" /> -->
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"left","width":150,"height":300},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script></body>
+
+</html>

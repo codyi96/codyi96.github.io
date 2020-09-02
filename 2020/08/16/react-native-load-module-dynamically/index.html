@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="0ZKwzX9LFUedBOuH61yLAYOYxWTCaei4OCp1kVJHHYU">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/gingerbread_man.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <title>
+        
+          React Native 模块动态加载的一些思考 - 渺沧海之一粟
+        
+    </title>
+
+    <link rel="canonical" href="https://codyi96.github.io/2020/08/16/react-native-load-module-dynamically/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS --> 
+    <link rel="stylesheet" href="/css/beantech.min.css">
+    
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <link rel="stylesheet" href="/css/widget.css">
+
+    <link rel="stylesheet" href="/css/rocket.css">
+
+    <link rel="stylesheet" href="/css/signature.css">
+
+    <link rel="stylesheet" href="/css/toc.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            background-image: url('header.jpg')
+            /*post*/
+        
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#react-native" title="react-native">react-native</a>
+                            
+                        </div>
+                        <h1>React Native 模块动态加载的一些思考</h1>
+                        <h2 class="subheading"></h2>
+                        <span class="meta">
+                            Posted by Codyi96 on
+                            2020-08-16
+                        </span>
+                    </div>
+                
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Codyi96</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Modify by Yu-Hsuan Yen -->
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="概述">概述</h1>
+<p>去年的整个工作重心都在React Native相关代码的二次开发上，但由于社区活跃度有所下降以及一些其他原因，自今年开始会慢慢减少React Native相关的代码工作。因此，打算写一些文章，算是对React Native相关工作的思考和沉淀。🤔</p>
+<p>本文主要针对React Native模块加载的一些流程展开思考，没有代码，只有方案，欢迎共同探讨。</p>
+<h1 id="react-native-优化">React Native 优化</h1>
+<p>相较于<a href="https://flutter.dev/" target="_blank" rel="noopener">flutter</a>，<a href="https://reactnative.dev/" target="_blank" rel="noopener">React Native</a>的性能问题一直被人诟病，因此社区也提出了很多针对性的解决方案。例如携程的<a href="https://github.com/ctripcorp/CRN" target="_blank" rel="noopener">CRN</a>，美团的<a href="https://tech.meituan.com/2019/12/19/meituan-mrn-practice.html" target="_blank" rel="noopener">MRN</a>，以及Facebook本家重磅推出的新引擎<a href="https://reactnative.dev/docs/hermes" target="_blank" rel="noopener">Hermes</a>等等。</p>
+<p>除了Hermes之外，其他方案大多皆是从<code>拆包</code>和<code>动态加载</code>两方面着手优化。</p>
+<h2 id="拆包优化">拆包优化</h2>
+<p>拆包，顾名思义，即将React Native应用中的大离线包(bundle)拆分为多个小包，以实现更细粒度的加载控制，可以理解为拆包是加载优化的一个基础。拆分逻辑主要是根据模块依赖，按照业务需求个性化拆分。在这方面，社区已有不少个人或团体提供了强大的解决方案，而且拆包不是本期的主要内容，这里就不再展开。</p>
+<h2 id="加载优化">加载优化</h2>
+<p>广义上的加载，实际包括了模块内容的读取和执行。作为一个React Native的开发者，相信你应该知道，React Native应用的逻辑代码基本上都存放在bundle文件中，那么如何快速读取bundle文件并解析其中内容到内存中，就成了加载优化的关键。</p>
+<p>如何提速？在不考虑引擎优化的情况下，很容易想到通过<code>减少需要加载的模块数</code>这一优化方案。<br>
+想象一下，如果我们额外加载了一个无用的模块（启动时无用，在之后的业务页面中才有可能用到），那么此模块所依赖的所有模块都将被加载进来，即以该模块为树根，依赖树中的每一个节点都将被加载。如果加载的无用模块太多，势必造成了大量的资源浪费。</p>
+<p>上一节提到，拆包将bundle拆分成了多个小bundle，这就带来两个好处：</p>
+<ul>
+<li>启动时只需读取核心bundle文件，减轻了IO的压力</li>
+<li>首次加载的模块数大大减少，减轻了内存的压力</li>
+</ul>
+<p>遗憾的是，拆包虽然能避免部分无用模块被加载，但是仍然做不到模块的按需加载。</p>
+<p>举个例子🌰：<br>
+现在有一个RN+原生混合开发的hybrid应用，其中首页是一个原生页面，提供两个按钮分别跳转至<code>RN页面A</code>和<code>RN页面B</code>，页面A又有一个按钮可以跳转至<code>RN页面AA</code>。<br>
+其中，页面A需要用到模块a-1,a-2；页面B需要用到模块b-1,b-2；页面AA需要用到模块aa-1,aa-2。<br>
+通过拆包，我们将bundle拆分为包含页面A和页面AA所需模块a-1,a-2,aa-1,aa-2的bundle-a，以及包含页面B所需模块b-1,b-2的bundle-b。</p>
+<blockquote>
+<p>你可能想问是否能将bundle-a再根据页面拆分为两个子bundle呢？理论上没有问题，但是要知道，bundle的加载不是简单的读取和解析，也需要一些前置的初始化工作，过于细致的bundle拆分会造成不必要的资源浪费，而且会影响RN页面跳转RN页面的性能，降低用户体验。因此，拆包也需要一个<code>平衡性的考虑</code>。</p>
+</blockquote>
+<p>RN框架构建出的离线包结构大致如下：</p>
+<table>
+<thead>
+<tr>
+<th>bundle结构</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>polyfill</td>
+</tr>
+<tr>
+<td>define</td>
+</tr>
+<tr>
+<td>require</td>
+</tr>
+</tbody>
+</table>
+<p>polyfill区是一些基础函数，定义了包括模块声明和模块引用相关的基础方法<br>
+define区是各个模块的定义<br>
+require区是入口模块的引用</p>
+<p>按照现有的bundle结构，在进入页面A时，系统加载bundle-a，会读取a-1,a-2,aa-1,aa-2的模块代码并执行其中的a-1,a-2。实际上，由于我们还未跳转到页面AA，因此aa-1,aa-2的代码是无需读取的。如何做到动态加载呢？</p>
+<p>我们注意到，模块加载机制里面有一个<code>nativeRequire</code>方式，这个方式仅在<code>indexed-ram-bundle</code>模式下生效。在<code>indexed-ram-bundle</code>模式下，会创建一个索引文件，当引用一个未定义的模块时，框架会通过该索引文件找到对应的代码并加载，查找就是通过<code>nativeRequire</code>完成的。</p>
+<p>我们借鉴这个思路，个性化全新的bundle结构，并重写了C++层的加载代码。加载bundle时，仅读取索引表和require区代码，根据依赖树和索引表加载需要的模块代码，实现按需加载。这样，就能减少非必要模块的define造成的时耗了。</p>
+<p>🌶需要注意的是，相较于传统方案，这样虽然减少了单次处理的模块数，但是<code>nativeRequire</code>方法的调用也增加了js层和c++层的通讯频率：</p>
+<p>在RN实例初始化期间，框架会触发大量的请求调用，js和c++的通讯来往频繁，如果这时候再有来自<code>nativeRequire</code>方面的压力，那势必会影响性能。因此，官方在bundle构建工具<a href="https://github.com/facebook/metro" target="_blank" rel="noopener">metro</a>中增加了<code>预加载模块</code>的配置，以避免大量模块通过<code>nativeRequire</code>加载造成的通讯桥拥堵。因此，拆包时也需要注意预加载模块的处理，公共模块单独拆分为一个bundle，且使用传统方式加载，而非<code>nativeRequire</code>。</p>
+<p>这样一来，通过拆包+按需加载提速，虽然<code>nativeRequire</code>相较于传统<code>require</code>方式损失了部分性能，但是由于使用<code>nativeRequire</code>的仅是数量上占少数的业务模块，因此总体上提升了加载性能。</p>
+<h1 id="参考">参考</h1>
+<ul>
+<li><a href="https://reactnative.dev/docs/ram-bundles-inline-requires" target="_blank" rel="noopener">ram-bundles-inline-requires</a></li>
+</ul>
+
+                
+
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2020/08/23/react-native-soloader-bug/" data-toggle="tooltip" data-placement="top" title="React Native踩坑简录·SoLoader">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2020/08/16/android-drawable-cache/" data-toggle="tooltip" data-placement="top" title="Android Drawable 缓存浅析">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                <!-- duoshuo Share start -->
+                
+                <!-- 多说 Share end-->
+
+                <!-- 多说评论框 start -->
+                
+                <!-- 多说评论框 end -->
+
+                <!-- disqus comment start -->
+                
+                    <div class="comment">
+                        <div id="disqus_thread" class="disqus-thread"></div>
+                    </div>
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      <aside id="sidebar">
+        <div id="toc" class="toc-article">
+        <strong class="toc-title">Contents</strong>
+        
+          <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#概述"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">概述</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#react-native-优化"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">React Native 优化</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#拆包优化"><span class="toc-nav-number">2.1.</span> <span class="toc-nav-text">拆包优化</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#加载优化"><span class="toc-nav-number">2.2.</span> <span class="toc-nav-text">加载优化</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#参考"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">参考</span></a></li></ol>
+        
+        </div>
+      </aside>
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#react-native" title="react-native">react-native</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="https://zhuanlan.zhihu.com/c_154978159" target="_blank">弱鸡的填坑之旅</a></li>
+                    
+                        <li><a href="https://codyi96.gitbook.io/leetcode/" target="_blank">Leetcode</a></li>
+                    
+                        <li><a href="https://codyi.vercel.app/" target="_blank">vercel镜像站</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- disqus embedded js code start (one page only need to embed once) -->
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = "codyi96";
+    var disqus_identifier = "https://codyi96.github.io/2020/08/16/react-native-load-module-dynamically/";
+    var disqus_url = "https://codyi96.github.io/2020/08/16/react-native-load-module-dynamically/";
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<!-- disqus embedded js code start end -->
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: '☄️'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/a-hey-59">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="http://weibo.com/2909212740">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/codyi96">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Codyi96 2020 
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    re-Ported by <a href="http://beantech.org">BeanTech</a> | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://img.shields.io/github/stars/codyi96/codyi96.github.io?style=social" >
+                    </iframe>
+                </p>
+                <p class="copyright text-muted">
+                    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+                    <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://codyi96.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+    <script>
+        var _gaId = 'UA-149875502-1';
+        var _gaDomain = 'auto';
+
+        // Originial
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+        ga('create', _gaId, _gaDomain);
+        ga('send', 'pageview');
+    </script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = 'e03d9cebfdf156f9569ec25fc546af69';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+<!-- Image to hack wechat -->
+<!-- <img src="https://codyi96.github.io/img/icon_wechat.jpeg" width="0" height="0" /> -->
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"left","width":150,"height":300},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script></body>
+
+</html>

@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="0ZKwzX9LFUedBOuH61yLAYOYxWTCaei4OCp1kVJHHYU">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/gingerbread_man.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <title>
+        
+          babel-register源码浅析 - 渺沧海之一粟
+        
+    </title>
+
+    <link rel="canonical" href="https://codyi96.github.io/2020/08/23/babel-register-cache/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS --> 
+    <link rel="stylesheet" href="/css/beantech.min.css">
+    
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <link rel="stylesheet" href="/css/widget.css">
+
+    <link rel="stylesheet" href="/css/rocket.css">
+
+    <link rel="stylesheet" href="/css/signature.css">
+
+    <link rel="stylesheet" href="/css/toc.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            background-image: url('header.jpg')
+            /*post*/
+        
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#babel" title="babel">babel</a>
+                            
+                              <a class="tag" href="/tags/#源码分析" title="源码分析">源码分析</a>
+                            
+                        </div>
+                        <h1>babel-register源码浅析</h1>
+                        <h2 class="subheading"></h2>
+                        <span class="meta">
+                            Posted by Codyi96 on
+                            2020-08-23
+                        </span>
+                    </div>
+                
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Codyi96</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Modify by Yu-Hsuan Yen -->
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="缘起">缘起</h1>
+<p><a href="https://www.npmjs.com/package/@babel/register" target="_blank" rel="noopener">@babel/register</a>是比较常见的一种babel处理方式，仅需一行代码即可实现即时编译。<br>
+有一次因为错误地发布了某个使用了 @babel/register 的 package ，但又不想再修改版本号，于是自然地使用了’npm unpublish’ + 'npm publish’的方式做了重复发布。<br>
+奇怪的是，在重新<code>npm install</code>之后，<code>node_modules</code>目录下该 package 的代码已经更新，但实际运行时似乎并没有生效。😑<br>
+这种玄学问题一时间似乎并没有办法找到一个合理的解释，网上搜寻一番亦无果，只好从源码中找端倪了。</p>
+<h1 id="精致的小玩意儿">精致的小玩意儿</h1>
+<p>私以为 @babel/register 这种高端工具应该是个很庞大的工程，其实不然，它真的非常的小巧！打开<a href="https://github.com/babel/babel/tree/main/packages/babel-register" target="_blank" rel="noopener">项目地址</a>，项目核心就<code>node.js</code>、<code>cache.js</code>两个代码文件，一共300行不到的代码量。实在是太酷了！</p>
+<h2 id="入口">入口</h2>
+<p>在开始真正的源码分析之前，先来看看用户是怎么使用的：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">require</span>(<span class="string">"@babel/register"</span>);</span><br></pre></td></tr></table></figure>
+<p>用户的代码加载了<code>@babel/register</code>的入口文件<code>index.js</code>:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">exports = <span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span> (<span class="params">...args</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> register(...args);</span><br><span class="line">&#125;;</span><br><span class="line">exports.__esModule = <span class="literal">true</span>;</span><br><span class="line"><span class="keyword">const</span> node = <span class="built_in">require</span>(<span class="string">"./node"</span>);</span><br><span class="line"><span class="keyword">const</span> register = node.default;</span><br><span class="line"><span class="built_in">Object</span>.assign(exports, node);</span><br></pre></td></tr></table></figure>
+<p>入口文件<code>index.js</code>加载了<code>node.js</code>。</p>
+<h2 id="nodejs">node.js</h2>
+<p><code>node.js</code>是整个项目核心中的核心，<code>@babel/register</code>的处理过程可以拆解成三个步骤：<code>hook</code>、<code>compile</code>、<code>cache</code>，而这三大步骤的控制中枢就是<code>node.js</code>！</p>
+<p>入口文件<code>index.js</code>加载<code>node.js</code>时，会执行<code>node.js</code>中的静态代码:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">register();</span><br></pre></td></tr></table></figure>
+<p><code>register()</code>做了什么呢？接着往下看:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="function"><span class="keyword">function</span> <span class="title">register</span>(<span class="params">opts?: Object = &#123;&#125;</span>) </span>&#123;</span><br><span class="line">  <span class="comment">// ... 参数拷贝，避免下面代码对 opts 操作错误地修改了原对象</span></span><br><span class="line">  hookExtensions(opts.extensions || DEFAULT_EXTENSIONS);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (opts.cache === <span class="literal">false</span> &amp;&amp; cache) &#123;</span><br><span class="line">    registerCache.clear();</span><br><span class="line">    cache = <span class="literal">null</span>;</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (opts.cache !== <span class="literal">false</span> &amp;&amp; !cache) &#123;</span><br><span class="line">    registerCache.load();</span><br><span class="line">    cache = registerCache.get();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// ... 删除 opts 的 extensions、cache字段</span></span><br><span class="line">  <span class="comment">// ... 基于 opts 构造 transformOpts</span></span><br><span class="line">  <span class="comment">// ... 从 opts 中解析工作空间</span></span><br><span class="line">  <span class="comment">// ... 如果用户没有显示定义 ignore 和 only 配置，则基于工作空间路径配置默认值</span></span><br><span class="line">  <span class="comment">//     ignore 指定不需要编译的文件 默认为工作空间下 node_modules 目录中的文件</span></span><br><span class="line">  <span class="comment">//     only   指定需要编译的文件   默认为工作空间下的所有文件</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>为了突出重点，上述代码省略了源代码中的一些处理逻辑，直接通过注释说明这部分功能。<br>
+可以看到<code>register()</code>的两个关键代码块<code>hookExtensions</code>及<code>registerCache</code></p>
+<h3 id="hookextensions">hookExtensions</h3>
+<p>顾名思义，<code>hookExtensions</code>当然是用来处理<code>hook</code>流程了，<code>compile</code>的调用应该也是在hook时做了相应的声明的:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; addHook &#125; <span class="keyword">from</span> <span class="string">"pirates"</span>;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">hookExtensions</span>(<span class="params">exts</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (piratesRevert) piratesRevert();</span><br><span class="line">  piratesRevert = addHook(compileHook, &#123; exts, <span class="attr">ignoreNodeModules</span>: <span class="literal">false</span> &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里引出了一个<a href="https://www.npmjs.com/package/pirates" target="_blank" rel="noopener">周下载量近千万</a>，但却鲜为人知的功能库: <a href="https://github.com/ariporad/pirates" target="_blank" rel="noopener">pirates</a>，在 Github 上甚至只有可怜的192颗星。事实上，就是这个看似其貌不扬的库，实现了<code>require</code>的<code>hook</code>~</p>
+<p>根据<a href="https://github.com/ariporad/pirates#piratesaddhookhook-opts-matcher-true-exts-js-ignorenodemodules-true-" target="_blank" rel="noopener">API介绍</a>，上述<code>addHook</code>的作用是: 对于符合<code>exts</code>后缀的文件（包括<code>node_modules</code>目录下的），当调用<code>require</code>时，使用<code>compileHook</code>替代其行为，<code>compileHook</code>接收一个形如<code>(code, filename)</code>的参数列表，返回<code>filename</code>对应的代码。此例中，<code>exts</code>为[’.js’,’.jsx’,’.es6’,’.es’,’.mjs’]</p>
+<p>如此一来，便完成了<code>hook</code>步骤。</p>
+<p>现在，我们再来看看<code>compile</code>:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">compile</span>(<span class="params">code, filename</span>) </span>&#123;</span><br><span class="line">  <span class="comment">// ... 计算 babel.transform 配置 opts</span></span><br><span class="line">  <span class="keyword">let</span> cacheKey = <span class="string">`<span class="subst">$&#123;<span class="built_in">JSON</span>.stringify(opts)&#125;</span>:<span class="subst">$&#123;babel.version&#125;</span>`</span>;</span><br><span class="line">  <span class="keyword">const</span> env = babel.getEnv(<span class="literal">false</span>);</span><br><span class="line">  <span class="keyword">if</span> (env) cacheKey += <span class="string">`:<span class="subst">$&#123;env&#125;</span>`</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> cached = cache &amp;&amp; cache[cacheKey];</span><br><span class="line">  <span class="keyword">if</span> (!cached || cached.mtime !== mtime(filename)) &#123;</span><br><span class="line">    cached = babel.transform(code, &#123;</span><br><span class="line">      <span class="comment">// ... opts</span></span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">if</span> (cache) &#123;</span><br><span class="line">      cache[cacheKey] = cached;</span><br><span class="line">      cached.mtime = mtime(filename);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// ... 处理 sourcemap</span></span><br><span class="line">  <span class="keyword">return</span> cached.code;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>本质上，<code>compile</code>还是调用<code>babel.transform</code>来处理。但需要注意的是，处于性能的考量，并不是所有情况都会去<code>compile</code>，在缓存开启的情况下，会优先使用缓存数据。<br>
+<code>compile</code>方法中的缓存仅仅是整个缓存机制的一部分，即在编译时期根据编译配置生成缓存键值并配置到缓存数组中，说白了就是内存缓存。<br>
+实际上，这个缓存是持久化的。</p>
+<h3 id="registercache">registerCache</h3>
+<p>我们回到<code>register()</code>，当缓存开关开启时，<code>@babel/register</code>通过<code>registerCache</code>对象读取持久化缓存信息，并初始化内存缓存:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> registerCache <span class="keyword">from</span> <span class="string">"./cache"</span>;</span><br><span class="line">registerCache.load();</span><br><span class="line">cache = registerCache.get();</span><br></pre></td></tr></table></figure>
+<p>这就引出了第三个步骤: <code>cache</code></p>
+<h3 id="cachejs">cache.js</h3>
+<p><code>cache.js</code>负责处理持久化缓存，我们先来看看上面提到的两个方法:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">load</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="comment">// ... 缓存不可用时，无需读取持久化数据，直接初始化为&#123;&#125;</span></span><br><span class="line"></span><br><span class="line">  process.on(<span class="string">"exit"</span>, save);</span><br><span class="line">  process.nextTick(save);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> cacheContent;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    cacheContent = fs.readFileSync(FILENAME);</span><br><span class="line">  &#125; <span class="keyword">catch</span> (e) &#123;</span><br><span class="line">    <span class="comment">// ... 异常处理</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    data = <span class="built_in">JSON</span>.parse(cacheContent);</span><br><span class="line">  &#125; <span class="keyword">catch</span> &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">get</span>(<span class="params"></span>): <span class="title">Object</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> data;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>load()</code>方法将<code>FILENAME</code>文件中的信息读取并解析到内存，通过<code>get()</code>提供给外部。在进程退出时，调用<code>save()</code>方法做持久化。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">save</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="comment">// ... 缓存不可用时，不保存，直接返回</span></span><br><span class="line">  <span class="keyword">let</span> serialised: string = <span class="string">"&#123;&#125;"</span>;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    serialised = <span class="built_in">JSON</span>.stringify(data, <span class="literal">null</span>, <span class="string">"  "</span>);</span><br><span class="line">  &#125; <span class="keyword">catch</span> (err) &#123;</span><br><span class="line">    <span class="comment">// ... 异常处理</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    makeDirSync(path.dirname(FILENAME));</span><br><span class="line">    fs.writeFileSync(FILENAME, serialised);</span><br><span class="line">  &#125; <span class="keyword">catch</span> (e) &#123;</span><br><span class="line">    <span class="comment">// ... 异常处理</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>save()</code>很简单，就是<code>load()</code>的一个逆操作: 字符串化内存缓存，存储于<code>FILENAME</code>。</p>
+<p>我们来看看<code>FILENAME</code>是什么:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> DEFAULT_CACHE_DIR =</span><br><span class="line">  findCacheDir(&#123; <span class="attr">name</span>: <span class="string">"@babel/register"</span> &#125;) || os.homedir() || os.tmpdir();</span><br><span class="line"><span class="keyword">const</span> DEFAULT_FILENAME = path.join(</span><br><span class="line">  DEFAULT_CACHE_DIR,</span><br><span class="line">  <span class="string">`.babel.<span class="subst">$&#123;babel.version&#125;</span>.<span class="subst">$&#123;babel.getEnv()&#125;</span>.json`</span>,</span><br><span class="line">);</span><br><span class="line"><span class="keyword">const</span> FILENAME: string = process.env.BABEL_CACHE_PATH || DEFAULT_FILENAME;</span><br></pre></td></tr></table></figure>
+<p><code>FILENAME</code>的具体值取决于版本信息与环境变量</p>
+<p>至此，<code>@babel/register</code>的神秘面纱终于揭开。</p>
+<h1 id="回归">回归</h1>
+<p>让我们重新审视开篇的那个玄学问题: 为什么<code>node_modules</code>目录下该 package 的代码已经更新，但实际运行时似乎并没有生效呢？<br>
+这是由于使用了旧的缓存信息，<code>@babel/register</code>在运行时并不会再去动态地编译相关文件。<br>
+找到了原因，再思考解决方法自然不成问题，有两种策略:</p>
+<ol>
+<li>从代码层级处理，使用<code>@babel/register</code>时传入配置<code>cache: false</code>，禁用缓存</li>
+<li>从系统层级处理，清除缓存文件或变更项目路径使缓存失效</li>
+</ol>
+
+                
+
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2020/08/30/react-strict-mode/" data-toggle="tooltip" data-placement="top" title="React 严格模式">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2020/08/23/react-native-soloader-bug/" data-toggle="tooltip" data-placement="top" title="React Native踩坑简录·SoLoader">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                <!-- duoshuo Share start -->
+                
+                <!-- 多说 Share end-->
+
+                <!-- 多说评论框 start -->
+                
+                <!-- 多说评论框 end -->
+
+                <!-- disqus comment start -->
+                
+                    <div class="comment">
+                        <div id="disqus_thread" class="disqus-thread"></div>
+                    </div>
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      <aside id="sidebar">
+        <div id="toc" class="toc-article">
+        <strong class="toc-title">Contents</strong>
+        
+          <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#缘起"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">缘起</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#精致的小玩意儿"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">精致的小玩意儿</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#入口"><span class="toc-nav-number">2.1.</span> <span class="toc-nav-text">入口</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#nodejs"><span class="toc-nav-number">2.2.</span> <span class="toc-nav-text">node.js</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#hookextensions"><span class="toc-nav-number">2.2.1.</span> <span class="toc-nav-text">hookExtensions</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#registercache"><span class="toc-nav-number">2.2.2.</span> <span class="toc-nav-text">registerCache</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#cachejs"><span class="toc-nav-number">2.2.3.</span> <span class="toc-nav-text">cache.js</span></a></li></ol></li></ol></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#回归"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">回归</span></a></li></ol>
+        
+        </div>
+      </aside>
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#babel" title="babel">babel</a>
+                        
+                          <a class="tag" href="/tags/#源码分析" title="源码分析">源码分析</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="https://zhuanlan.zhihu.com/c_154978159" target="_blank">弱鸡的填坑之旅</a></li>
+                    
+                        <li><a href="https://codyi96.gitbook.io/leetcode/" target="_blank">Leetcode</a></li>
+                    
+                        <li><a href="https://codyi.vercel.app/" target="_blank">vercel镜像站</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- disqus embedded js code start (one page only need to embed once) -->
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = "codyi96";
+    var disqus_identifier = "https://codyi96.github.io/2020/08/23/babel-register-cache/";
+    var disqus_url = "https://codyi96.github.io/2020/08/23/babel-register-cache/";
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<!-- disqus embedded js code start end -->
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: '☄️'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/a-hey-59">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="http://weibo.com/2909212740">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/codyi96">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Codyi96 2020 
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    re-Ported by <a href="http://beantech.org">BeanTech</a> | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://img.shields.io/github/stars/codyi96/codyi96.github.io?style=social" >
+                    </iframe>
+                </p>
+                <p class="copyright text-muted">
+                    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+                    <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://codyi96.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+    <script>
+        var _gaId = 'UA-149875502-1';
+        var _gaDomain = 'auto';
+
+        // Originial
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+        ga('create', _gaId, _gaDomain);
+        ga('send', 'pageview');
+    </script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = 'e03d9cebfdf156f9569ec25fc546af69';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+<!-- Image to hack wechat -->
+<!-- <img src="https://codyi96.github.io/img/icon_wechat.jpeg" width="0" height="0" /> -->
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"left","width":150,"height":300},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script></body>
+
+</html>

@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="0ZKwzX9LFUedBOuH61yLAYOYxWTCaei4OCp1kVJHHYU">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/gingerbread_man.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <title>
+        
+          GitBook安装与使用 - 渺沧海之一粟
+        
+    </title>
+
+    <link rel="canonical" href="https://codyi96.github.io/2019/10/06/try-gitbook/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS --> 
+    <link rel="stylesheet" href="/css/beantech.min.css">
+    
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <link rel="stylesheet" href="/css/widget.css">
+
+    <link rel="stylesheet" href="/css/rocket.css">
+
+    <link rel="stylesheet" href="/css/signature.css">
+
+    <link rel="stylesheet" href="/css/toc.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            background-image: url('header.jpg')
+            /*post*/
+        
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#探索" title="探索">探索</a>
+                            
+                        </div>
+                        <h1>GitBook安装与使用</h1>
+                        <h2 class="subheading"></h2>
+                        <span class="meta">
+                            Posted by Codyi96 on
+                            2019-10-06
+                        </span>
+                    </div>
+                
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Codyi96</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Modify by Yu-Hsuan Yen -->
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="写在写在前面的前面劝退">写在写在前面的前面·劝退</h1>
+<p>先说一句，GitBook有坑，慎入。</p>
+<h1 id="写在前面">写在前面</h1>
+<p>眼看着阿里云学生机的羊毛就要薅到头了，就想着搭个<code>免费</code>的个人博客玩玩，顺便沉淀下日常所学和踩过的坑。调研了一下网上说的比较多的就属<code>GitBook</code>和<code>GitPage</code>了，正好都没玩过，趁着假期可以好好把玩一番。🛴</p>
+<p></p>
+<p>需要注意的是，GitBook在2018.04.09发布了全新的1.0版本，同时迁移了旧版本数据。由于此次变动较大，网上的教程大多不可用，本文未及之处还请参阅<a href="https://docs.gitbook.com/" target="_blank" rel="noopener">官方文档</a>。</p>
+<h1 id="what-is-gitbook">What is Gitbook</h1>
+<blockquote>
+<p>GitBook is a modern documentation platform where teams can document everything from products, to APIs and internal knowledge-bases.</p>
+</blockquote>
+<p>以上是官网对于GitBook的定义，简单来说，<a href="https://www.gitbook.com/" target="_blank" rel="noopener">GitBook</a>是一款基于Git和Markdown的书本编排系统。</p>
+<p></p>
+<p>GitBook提供了多种使用姿势，但是不管哪种都需要先在官网注册，当然，你可以选择使用谷歌账号或GitHub账号快速注册。</p>
+<p></p>
+<p>下面讲一下常用的两种：控制台方式和GitHub方式。</p>
+<h1 id="控制台方式">控制台方式</h1>
+<p>控制台方式适合零基础的非编程人员使用，它提供了一套相当不错的交互系统能够帮助你快速创建或修改书本、页面以及做一些简单的配置，你甚至不需要了解Git相关的知识。</p>
+<h2 id="安装">安装</h2>
+<p>无需安装，登录控制台即可。</p>
+<h2 id="使用">使用</h2>
+<p>傻瓜式操作，这里不再赘述。</p>
+<h2 id="特点">特点</h2>
+<ul>
+<li>无需安装，开箱即用</li>
+<li>良好的交互系统</li>
+<li>简单的配置方式</li>
+<li>无需了解Git相关知识</li>
+</ul>
+<h2 id="局限性">局限性</h2>
+<ul>
+<li>需要科学上网能力</li>
+<li>无法离线编辑</li>
+<li>提交记录不如Git丰富</li>
+</ul>
+<h1 id="github方式">Github方式</h1>
+<p>相较于控制台方式，GitHub方式更符合编程人员的习惯。仅需在控制台关联对应的GitHub仓库，就可以将其与GitBook保持同步，只要推送commit到GitHub仓库，GitBook将自动同步并触发构建。</p>
+<h2 id="注意事项">注意事项</h2>
+<p>在<a href="https://docs.gitbook.com/v2-changes/important-differences" target="_blank" rel="noopener">GitBook-v2重要变更</a>中，官方正式声明废弃了<a href="https://docs.gitbook.com/v2-changes/important-differences#cli-toolchain" target="_blank" rel="noopener">CLI工具</a>和<a href="https://docs.gitbook.com/v2-changes/important-differences#plugins" target="_blank" rel="noopener">Plugin系统</a>，并且目前没有计划恢复。但是我们仍然推荐安装CLI工具，借助其强大的功能快速开发，比如本地调试，尽管其效果可能与最后效果有稍许不同。</p>
+<h2 id="前置条件">前置条件</h2>
+<ul>
+<li>Node环境</li>
+<li>与GitBook关联的GitHub仓库</li>
+</ul>
+<h2 id="安装">安装</h2>
+<ol>
+<li>安装CLI工具</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo npm install gitbook-cli -g</span><br></pre></td></tr></table></figure>
+<h2 id="使用">使用</h2>
+<h3 id="书本初始化">书本初始化</h3>
+<ol>
+<li>创建如下书本目录</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">MyBook/</span><br><span class="line">├── README.md</span><br><span class="line">└── SUMMARY.md</span><br></pre></td></tr></table></figure>
+<p>其中，<code>README.md</code>是书本介绍，<code>SUMMARY.md</code>是显示在左侧的书本目录。</p>
+<ol start="2">
+<li>编辑<code>SUMMARY.md</code>，如：</li>
+</ol>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="section"># SUMMARY</span></span><br><span class="line"><span class="bullet">* </span>[<span class="string">简介</span>](<span class="link">README.md</span>)</span><br><span class="line"><span class="bullet">* </span>[<span class="string">简单题</span>](<span class="link">easy/README.md</span>)</span><br><span class="line"><span class="bullet">  * </span>[<span class="string">两数之和</span>](<span class="link">easy/两数之和.md</span>)</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>在书本目录下初始化书本</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gitbook init</span><br></pre></td></tr></table></figure>
+<p>书本目录对应的文件树就创建好了，如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── README.md</span><br><span class="line">├── SUMMARY.md</span><br><span class="line">└── easy</span><br><span class="line">    ├── README.md</span><br><span class="line">    └── 两数之和.md</span><br></pre></td></tr></table></figure>
+<h3 id="在线调试">在线调试</h3>
+<ol>
+<li>在书本目录下开启在线调试</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gitbook serve</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>通过http://localhost:4000预览</li>
+</ol>
+<h2 id="特点">特点</h2>
+<ul>
+<li>符合编程习惯</li>
+<li>离线编辑，在线提交</li>
+<li>丰富的提交记录</li>
+<li>支持手动生成静态网页</li>
+<li>支持本地调试</li>
+</ul>
+<h2 id="局限性">局限性</h2>
+<ul>
+<li>有坑！有坑！有坑！</li>
+<li>需要科学上网能力</li>
+<li>需要掌握Git相关知识</li>
+<li>需要借助CLI工具</li>
+</ul>
+<h2 id="天坑">天坑</h2>
+<p>根本原因：官方废弃了<a href="https://docs.gitbook.com/v2-changes/important-differences#cli-toolchain" target="_blank" rel="noopener">CLI工具</a>，导致了目前CLI工具的处理逻辑与远端处理不同。</p>
+<p></p>
+<p>首先明确一点，在线调试实际上会首先调用<code>gitbook build</code>编译书本，使用的是本地编译；而推送commit到GitHub仓库，由GitBook同步并编译，使用的是远端编译。</p>
+<p></p>
+<p>二者主要区别在于：本地编译参考<code>book.json</code>中的配置，而远端编译参考的是控制台的配置，即使你将本地<code>book.json</code>提交到GitHub也无济于事。</p>
+<p></p>
+<p>这就导致了本地调试的预览效果与最终效果<code>不一致</code>！</p>
+<h2 id="填坑">填坑</h2>
+<p>如何填坑？两个办法：</p>
+<ol>
+<li>使用<code>gitbook build</code>编译书本，通过GitPage部署编译生成的网页</li>
+<li>弃坑，直接转用GitPage</li>
+</ol>
+<h2 id="参考环境">参考环境</h2>
+<ul>
+<li>Node version: 10.16.3</li>
+<li>CLI version: 2.3.2</li>
+<li>GitBook version: 3.2.3</li>
+</ul>
+<h1 id="插件系统">插件系统</h1>
+<p>已废弃，但如果你想使用<code>gitbook build</code>编译书本，再通过GitPage部署编译生成的网页，那也不是不行。</p>
+<h3 id="插件集成">插件集成</h3>
+<p>拿<a href="https://github.com/codyi96/gitbook-plugin-baidu-statistics" target="_blank" rel="noopener">百度统计</a>插件举个例子🌰：</p>
+<ol>
+<li>编辑<code>book.json</code></li>
+</ol>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"title"</span> : <span class="string">"力扣题解"</span>,</span><br><span class="line">    <span class="attr">"author"</span>: <span class="string">"Codyi96"</span>,</span><br><span class="line">    <span class="attr">"description"</span>: <span class="string">"Codyi96的力扣题解"</span>,</span><br><span class="line">    <span class="attr">"language"</span>: <span class="string">"zh-hans"</span>,</span><br><span class="line">    <span class="attr">"root"</span>: <span class="string">"."</span>,</span><br><span class="line">    <span class="attr">"plugins"</span>: [</span><br><span class="line">        <span class="string">"baidu-statistics"</span></span><br><span class="line">    ],</span><br><span class="line">    <span class="attr">"pluginsConfig"</span>: &#123;</span><br><span class="line">        <span class="attr">"baidu"</span>: &#123;</span><br><span class="line">            <span class="attr">"token"</span>: <span class="string">"your token"</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>安装插件</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gitbook install</span><br></pre></td></tr></table></figure>
+<h3 id="插件开发">插件开发</h3>
+<p>参考<a href="https://github.com/codyi96/gitbook-plugin-baidu-statistics" target="_blank" rel="noopener">百度统计</a>插件，需要注意：</p>
+<ol>
+<li>插件是在npm上发布的遵循传统定义的node包</li>
+<li>包名必须以<code>gitbook-plugin-</code>开头</li>
+<li>包引擎必须包含<code>gitbook</code></li>
+</ol>
+<h1 id="费用">费用</h1>
+<p>个人版：免费。支持10个自定义域。</p>
+<p>团队版：针对非开源项目$40/月起，针对开源项目免费。无限自定义域。</p>
+<p>企业版：面议。</p>
+
+                
+
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2019/10/10/react-native-image-load/" data-toggle="tooltip" data-placement="top" title="React Native源码分析·Image uri">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2019/10/04/hello-world/" data-toggle="tooltip" data-placement="top" title="Hello World!">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                <!-- duoshuo Share start -->
+                
+                <!-- 多说 Share end-->
+
+                <!-- 多说评论框 start -->
+                
+                <!-- 多说评论框 end -->
+
+                <!-- disqus comment start -->
+                
+                    <div class="comment">
+                        <div id="disqus_thread" class="disqus-thread"></div>
+                    </div>
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      <aside id="sidebar">
+        <div id="toc" class="toc-article">
+        <strong class="toc-title">Contents</strong>
+        
+          <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#写在写在前面的前面劝退"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">写在写在前面的前面·劝退</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#写在前面"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">写在前面</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#what-is-gitbook"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">What is Gitbook</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#控制台方式"><span class="toc-nav-number">4.</span> <span class="toc-nav-text">控制台方式</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#安装"><span class="toc-nav-number">4.1.</span> <span class="toc-nav-text">安装</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#使用"><span class="toc-nav-number">4.2.</span> <span class="toc-nav-text">使用</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#特点"><span class="toc-nav-number">4.3.</span> <span class="toc-nav-text">特点</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#局限性"><span class="toc-nav-number">4.4.</span> <span class="toc-nav-text">局限性</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#github方式"><span class="toc-nav-number">5.</span> <span class="toc-nav-text">Github方式</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#注意事项"><span class="toc-nav-number">5.1.</span> <span class="toc-nav-text">注意事项</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#前置条件"><span class="toc-nav-number">5.2.</span> <span class="toc-nav-text">前置条件</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#安装"><span class="toc-nav-number">5.3.</span> <span class="toc-nav-text">安装</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#使用"><span class="toc-nav-number">5.4.</span> <span class="toc-nav-text">使用</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#书本初始化"><span class="toc-nav-number">5.4.1.</span> <span class="toc-nav-text">书本初始化</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#在线调试"><span class="toc-nav-number">5.4.2.</span> <span class="toc-nav-text">在线调试</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#特点"><span class="toc-nav-number">5.5.</span> <span class="toc-nav-text">特点</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#局限性"><span class="toc-nav-number">5.6.</span> <span class="toc-nav-text">局限性</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#天坑"><span class="toc-nav-number">5.7.</span> <span class="toc-nav-text">天坑</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#填坑"><span class="toc-nav-number">5.8.</span> <span class="toc-nav-text">填坑</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#参考环境"><span class="toc-nav-number">5.9.</span> <span class="toc-nav-text">参考环境</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#插件系统"><span class="toc-nav-number">6.</span> <span class="toc-nav-text">插件系统</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#插件集成"><span class="toc-nav-number">6.0.1.</span> <span class="toc-nav-text">插件集成</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#插件开发"><span class="toc-nav-number">6.0.2.</span> <span class="toc-nav-text">插件开发</span></a></li></ol></li></ol></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#费用"><span class="toc-nav-number">7.</span> <span class="toc-nav-text">费用</span></a></li></ol>
+        
+        </div>
+      </aside>
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#探索" title="探索">探索</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="https://zhuanlan.zhihu.com/c_154978159" target="_blank">弱鸡的填坑之旅</a></li>
+                    
+                        <li><a href="https://codyi96.gitbook.io/leetcode/" target="_blank">Leetcode</a></li>
+                    
+                        <li><a href="https://codyi.vercel.app/" target="_blank">vercel镜像站</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- disqus embedded js code start (one page only need to embed once) -->
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = "codyi96";
+    var disqus_identifier = "https://codyi96.github.io/2019/10/06/try-gitbook/";
+    var disqus_url = "https://codyi96.github.io/2019/10/06/try-gitbook/";
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<!-- disqus embedded js code start end -->
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: '☄️'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/a-hey-59">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="http://weibo.com/2909212740">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/codyi96">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Codyi96 2020 
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    re-Ported by <a href="http://beantech.org">BeanTech</a> | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://img.shields.io/github/stars/codyi96/codyi96.github.io?style=social" >
+                    </iframe>
+                </p>
+                <p class="copyright text-muted">
+                    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+                    <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://codyi96.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+    <script>
+        var _gaId = 'UA-149875502-1';
+        var _gaDomain = 'auto';
+
+        // Originial
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+        ga('create', _gaId, _gaDomain);
+        ga('send', 'pageview');
+    </script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = 'e03d9cebfdf156f9569ec25fc546af69';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+<!-- Image to hack wechat -->
+<!-- <img src="https://codyi96.github.io/img/icon_wechat.jpeg" width="0" height="0" /> -->
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"left","width":150,"height":300},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script></body>
+
+</html>

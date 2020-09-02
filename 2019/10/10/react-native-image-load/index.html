@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="0ZKwzX9LFUedBOuH61yLAYOYxWTCaei4OCp1kVJHHYU">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/gingerbread_man.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <title>
+        
+          React Native源码分析·Image uri - 渺沧海之一粟
+        
+    </title>
+
+    <link rel="canonical" href="https://codyi96.github.io/2019/10/10/react-native-image-load/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS --> 
+    <link rel="stylesheet" href="/css/beantech.min.css">
+    
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <link rel="stylesheet" href="/css/widget.css">
+
+    <link rel="stylesheet" href="/css/rocket.css">
+
+    <link rel="stylesheet" href="/css/signature.css">
+
+    <link rel="stylesheet" href="/css/toc.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            background-image: url('nature.jpg')
+            /*post*/
+        
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#源码分析" title="源码分析">源码分析</a>
+                            
+                              <a class="tag" href="/tags/#react-native" title="react-native">react-native</a>
+                            
+                        </div>
+                        <h1>React Native源码分析·Image uri</h1>
+                        <h2 class="subheading"></h2>
+                        <span class="meta">
+                            Posted by Codyi96 on
+                            2019-10-10
+                        </span>
+                    </div>
+                
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Codyi96</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Modify by Yu-Hsuan Yen -->
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="image">Image</h1>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React, &#123; Component &#125; <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; View, Image &#125; <span class="keyword">from</span> <span class="string">'react-native'</span>;</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="class"><span class="keyword">class</span> <span class="title">DisplayAnImage</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">  render() &#123;</span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">      &lt;View&gt;</span><br><span class="line">        &lt;Image</span><br><span class="line">          style=&#123;&#123;<span class="attr">width</span>: <span class="number">50</span>, <span class="attr">height</span>: <span class="number">50</span>&#125;&#125;</span><br><span class="line">          source=&#123;<span class="built_in">require</span>(<span class="string">'@expo/snack-static/react-native-logo.png'</span>)&#125;</span><br><span class="line">        /&gt;</span><br><span class="line">      &lt;<span class="regexp">/View&gt;</span></span><br><span class="line"><span class="regexp">    );</span></span><br><span class="line"><span class="regexp">  &#125;</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br></pre></td></tr></table></figure>
+<p><a href="https://facebook.github.io/react-native/docs/image" target="_blank" rel="noopener">Image</a>是React Native官方提供的图片控件，用法如上。</p><p></p><p></p>
+<p>本文以Android为例，记录了路径解析相关源码的分析历程。</p>
+<h1 id="源码分析">源码分析</h1>
+<h2 id="imageandroidjs">Image.android.js</h2>
+<p>从用法我们可以看出，Image控件所使用的图片路径信息是通过<code>source</code>属性传入的。</p><p></p><p></p>
+<p>在Android平台上，Image控件的具体实现在<code>/Libraries/Image/Image.android.js</code>：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Libraries/Image/Image.android.js</span></span><br><span class="line"><span class="keyword">let</span> Image = (</span><br><span class="line">  props: ImagePropsType,</span><br><span class="line">  forwardedRef: ?React.Ref&lt;<span class="string">'RCTTextInlineImage'</span> | <span class="string">'ImageViewNativeComponent'</span>&gt;,</span><br><span class="line">) =&gt; &#123;</span><br><span class="line">  <span class="keyword">let</span> source = resolveAssetSource(props.source);</span><br><span class="line">  <span class="keyword">const</span> defaultSource = resolveAssetSource(props.defaultSource);</span><br><span class="line">  <span class="keyword">const</span> loadingIndicatorSource = resolveAssetSource(</span><br><span class="line">    props.loadingIndicatorSource,</span><br><span class="line">  );</span><br><span class="line">  <span class="comment">//…………</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="resolveassetsourcejs">resolveAssetSource.js</h2>
+<p>通过<code>resolveAssetSource</code>方法，框架将属性传入的图片源信息标准化为可用的图片信息集合：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Libraries/Image/resolveAssetSource.js</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">resolveAssetSource</span>(<span class="params">source: any</span>): ?<span class="title">ResolvedAssetSource</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="keyword">typeof</span> source === <span class="string">'object'</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> source;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">const</span> asset = AssetRegistry.getAssetByID(source);</span><br><span class="line">  <span class="keyword">if</span> (!asset) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">const</span> resolver = <span class="keyword">new</span> AssetSourceResolver(</span><br><span class="line">    getDevServerURL(),</span><br><span class="line">    getScriptURL(),</span><br><span class="line">    asset,</span><br><span class="line">  );</span><br><span class="line">  <span class="keyword">if</span> (_customSourceTransformer) &#123;</span><br><span class="line">    <span class="keyword">return</span> _customSourceTransformer(resolver);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> resolver.defaultAsset();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>source</code>属性有两种形式：</p>
+<ul>
+<li>object</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">source=&#123;&#123;</span><br><span class="line">        uri: <span class="string">'https://facebook.github.io/react-native/img/tiny_logo.png'</span></span><br><span class="line">&#125;&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>number</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source=&#123;<span class="built_in">require</span>(<span class="string">'@expo/snack-static/react-native-logo.png'</span>)&#125;</span><br></pre></td></tr></table></figure>
+<p>对于指定uri方式，<code>resolveAssetSource</code>方法直接返回；</p><p></p><p></p>
+<p>对于模块引用方式：</p>
+<ol>
+<li>首先通过<code>AssetRegistry.getAssetByID</code>方法获取图片的分辨率等信息</li>
+<li>然后初始化<code>AssetSourceResolver</code>对象，它是路径信息的实际操刀手</li>
+<li>最后通过<code>AssetSourceResolver</code>的<code>defaultAsset</code>方法，获取图片信息集合</li>
+</ol>
+<p>图片信息集合格式如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">__packager_asset: <span class="literal">true</span>,</span><br><span class="line">width: <span class="keyword">this</span>.asset.width,     																								 <span class="comment">// 图片宽度</span></span><br><span class="line">height: <span class="keyword">this</span>.asset.height,     																							 <span class="comment">// 图片高度</span></span><br><span class="line">uri: source,																																 <span class="comment">// 图片相对路径</span></span><br><span class="line">scale: AssetSourceResolver.pickScale(<span class="keyword">this</span>.asset.scales, PixelRatio.get()),   <span class="comment">// 图片分辨率</span></span><br></pre></td></tr></table></figure>
+<h2 id="assetsourceresolverjs">AssetSourceResolver.js</h2>
+<p>接下来，我们正式进入真正的图片路径解析逻辑，看看<code>AssetSourceResolver</code>是如何处理的：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Libraries/Image/AssetSourceResolver.js</span></span><br><span class="line">defaultAsset(): ResolvedAssetSource &#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="keyword">this</span>.isLoadedFromServer()) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.assetServerURL();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (Platform.OS === <span class="string">'android'</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.isLoadedFromFileSystem()</span><br><span class="line">      ? <span class="keyword">this</span>.drawableFolderInBundle()</span><br><span class="line">      : <span class="keyword">this</span>.resourceIdentifierWithoutScale();</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.scaledAssetURLNearBundle();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>本地调试时，<code>isLoadedFromServer</code>返回<code>true</code>，方法执行<code>assetServerURL</code>逻辑。</p><p></p><p></p>
+<p>而一般情况下，我们都是通过离线包的形式加载并执行js代码的，因此在Android平台，一般会执行<code>drawableFolderInBundle</code>或<code>resourceIdentifierWithoutScale</code>方法，它们分别表示从文件系统加载和从Asset加载。</p>
+<ul>
+<li>从文件系统加载</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Libraries/Image/AssetSourceResolver.js</span></span><br><span class="line">drawableFolderInBundle(): ResolvedAssetSource &#123;</span><br><span class="line">  <span class="keyword">const</span> path = <span class="keyword">this</span>.jsbundleUrl || <span class="string">'file://'</span>;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">this</span>.fromSource(path + getAssetPathInDrawableFolder(<span class="keyword">this</span>.asset));</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getAssetPathInDrawableFolder</span>(<span class="params">asset</span>): <span class="title">string</span> </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> scale = AssetSourceResolver.pickScale(asset.scales, PixelRatio.get());</span><br><span class="line">  <span class="keyword">const</span> drawbleFolder = assetPathUtils.getAndroidResourceFolderName(</span><br><span class="line">    asset,</span><br><span class="line">    scale,</span><br><span class="line">  );</span><br><span class="line">  <span class="keyword">const</span> fileName = assetPathUtils.getAndroidResourceIdentifier(asset);</span><br><span class="line">  <span class="keyword">return</span> drawbleFolder + <span class="string">'/'</span> + fileName + <span class="string">'.'</span> + asset.type;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//…………</span></span><br></pre></td></tr></table></figure>
+<p><code>jsbundleUrl</code>是构造方法传入的Bundle路径，通过<code>getAssetPathInDrawableFolder</code>计算出的图片相对路径与之拼接，得出图片的最终路径。</p><p></p><p></p>
+<p>在<code>getAssetPathInDrawableFolder</code>方法中，我们首先选取适合于当前设备的图片分辨率<code>scale</code>，然后根据<code>scale</code>计算图片应当存储的文件夹名（例如：ldpi、mdpi等等），同时通过<code>getAndroidResourceIdentifier</code>方法计算文件名，最后将路径拼接。</p><p></p><p></p>
+<p>顺带一提，<code>fromSource</code>方法接收一个图片路径参数并返回一个对象，这个对象就是上面提到的“图片信息集合”。源码如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Libraries/Image/AssetSourceResolver.js</span></span><br><span class="line">fromSource(source: string): ResolvedAssetSource &#123;</span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    __packager_asset: <span class="literal">true</span>,</span><br><span class="line">    width: <span class="keyword">this</span>.asset.width,</span><br><span class="line">    height: <span class="keyword">this</span>.asset.height,</span><br><span class="line">    uri: source,</span><br><span class="line">    scale: AssetSourceResolver.pickScale(<span class="keyword">this</span>.asset.scales, PixelRatio.get()),</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>从Asset加载</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Libraries/Image/AssetSourceResolver.js</span></span><br><span class="line">resourceIdentifierWithoutScale(): ResolvedAssetSource &#123;</span><br><span class="line">  invariant(</span><br><span class="line">    Platform.OS === <span class="string">'android'</span>,</span><br><span class="line">    <span class="string">'resource identifiers work on Android'</span>,</span><br><span class="line">  );</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">this</span>.fromSource(</span><br><span class="line">    assetPathUtils.getAndroidResourceIdentifier(<span class="keyword">this</span>.asset),</span><br><span class="line">  );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>相比从文件系统加载，Asset方式就比较简单了：直接将<code>getAndroidResourceIdentifier</code>结果送入<code>fromSource</code>方法执行，返回其结果。</p><p></p><p></p>
+<p>至此，你可能会好奇<code>getAndroidResourceIdentifier</code>方法到底做了些什么，下面通过源码简单做一下说明：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Libraries/Image/assetPathUtils.js</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getAndroidResourceIdentifier</span>(<span class="params">asset: PackagerAsset</span>): <span class="title">string</span> </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> folderPath = getBasePath(asset);</span><br><span class="line">  <span class="keyword">return</span> (folderPath + <span class="string">'/'</span> + asset.name)</span><br><span class="line">    .toLowerCase()</span><br><span class="line">    .replace(<span class="regexp">/\//g</span>, <span class="string">'_'</span>) <span class="comment">// Encode folder structure in file name</span></span><br><span class="line">    .replace(<span class="regexp">/([^a-z0-9_])/g</span>, <span class="string">''</span>) <span class="comment">// Remove illegal chars</span></span><br><span class="line">    .replace(<span class="regexp">/^assets_/</span>, <span class="string">''</span>); <span class="comment">// Remove "assets_" prefix</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getBasePath</span>(<span class="params">asset: PackagerAsset</span>): <span class="title">string</span> </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> basePath = asset.httpServerLocation;</span><br><span class="line">  <span class="keyword">if</span> (basePath[<span class="number">0</span>] === <span class="string">'/'</span>) &#123;</span><br><span class="line">    basePath = basePath.substr(<span class="number">1</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> basePath;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们知道，<code>asset.httpServerLocation</code>一般为<code>/assets/xxx</code>形式，那么这段代码的作用就是：</p>
+<ul>
+<li>去掉首位<code>/</code></li>
+<li>拼接<code>asset.name</code>(图片名)</li>
+<li>大写转小写</li>
+<li>全局替换<code>/</code>为<code>_</code></li>
+<li>删除非法字符(合法字符为：小写字母、数字、下划线)</li>
+<li>删除<code>assets_</code></li>
+</ul>
+<p>举个例子🌰：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="string">"__packager_asset"</span>: <span class="literal">true</span>,</span><br><span class="line">    <span class="string">"httpServerLocation"</span>: <span class="string">"/assets/img"</span>,</span><br><span class="line">    <span class="string">"width"</span>: <span class="number">2048</span>,</span><br><span class="line">    <span class="string">"height"</span>: <span class="number">1108</span>,</span><br><span class="line">    <span class="string">"scales"</span>: [<span class="number">1</span>],</span><br><span class="line">    <span class="string">"hash"</span>: <span class="string">"104a4c141945b2ac01ac1a8368a9c9e0"</span>,</span><br><span class="line">    <span class="string">"name"</span>: <span class="string">"poyoo"</span>,</span><br><span class="line">    <span class="string">"type"</span>: <span class="string">"jpg"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>将被转换为</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">img_poyoo</span><br></pre></td></tr></table></figure>
+<h2 id="reactimagemanagerjava">ReactImageManager.java</h2>
+<p>通过上面的分析我们知道，js端返回的“图片信息集合”中的<code>uri</code>属性包含了图片路径信息。而在<code>Image.android.js</code>中，这个值最终通过<code>src</code>属性正式传递给java端的原生视图。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ReactImageManager.java</span></span><br><span class="line"><span class="meta">@ReactModule</span>(name = ReactImageManager.REACT_CLASS)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ReactImageManager</span> <span class="keyword">extends</span> <span class="title">SimpleViewManager</span>&lt;<span class="title">ReactImageView</span>&gt; </span>&#123;</span><br><span class="line">  <span class="comment">// …………</span></span><br><span class="line">  <span class="comment">// In JS this is Image.props.source</span></span><br><span class="line">  <span class="meta">@ReactProp</span>(name = <span class="string">"src"</span>)</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setSource</span><span class="params">(ReactImageView view, @Nullable ReadableArray sources)</span> </span>&#123;</span><br><span class="line">    view.setSource(sources);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，图片控件也是使用了经典的原生UI控件实现方式。事实上，在官方教程中也正是以它为样例，来介绍如何实现一个原生UI控件的，详见<a href="https://facebook.github.io/react-native/docs/native-components-android" target="_blank" rel="noopener">Native UI Components</a>。</p>
+<h2 id="reactimageviewjava">ReactImageView.java</h2>
+<p>我们继续跟踪代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ReactImageView.java</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Wrapper class around Fresco's GenericDraweeView, enabling persisting props across multiple view</span></span><br><span class="line"><span class="comment"> * update and consistent processing of both static and network images.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ReactImageView</span> <span class="keyword">extends</span> <span class="title">GenericDraweeView</span> </span>&#123;</span><br><span class="line">  <span class="comment">// …………</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setSource</span><span class="params">(@Nullable ReadableArray sources)</span> </span>&#123;</span><br><span class="line">    mSources.clear();</span><br><span class="line">    <span class="keyword">if</span> (sources == <span class="keyword">null</span> || sources.size() == <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="comment">// …………</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="comment">// Optimize for the case where we have just one uri, case in which we don't need the sizes</span></span><br><span class="line">      <span class="keyword">if</span> (sources.size() == <span class="number">1</span>) &#123;</span><br><span class="line">        ReadableMap source = ReactImageView.getMap(<span class="number">0</span>);</span><br><span class="line">        String uri = source.getString(<span class="string">"uri"</span>);</span><br><span class="line">        ImageSource imageSource = <span class="keyword">new</span> ImageSource(getContext(), uri);</span><br><span class="line">        mSources.add(imageSource);</span><br><span class="line">        <span class="comment">// …………</span></span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// …………</span></span><br><span class="line">          String uri = source.getString(<span class="string">"uri"</span>);</span><br><span class="line">          ImageSource imageSource =</span><br><span class="line">              <span class="keyword">new</span> ImageSource(</span><br><span class="line">                  getContext(), uri, source.getDouble(<span class="string">"width"</span>), source.getDouble(<span class="string">"height"</span>));</span><br><span class="line">          mSources.add(imageSource);</span><br><span class="line">        <span class="comment">// …………</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// …………</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>ReactImageView</code>从<code>source</code>中提取<code>uri</code>属性，并以此创建<code>ImageSource</code>对象，这个对象记录了图片信息，可以理解为java端的“图片信息集合”。</p>
+<h2 id="imagesourcejava">ImageSource.java</h2>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ImageSource.java</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ImageSource</span> </span>&#123;</span><br><span class="line">  <span class="keyword">private</span> <span class="meta">@Nullable</span> Uri mUri;</span><br><span class="line">  <span class="keyword">private</span> String mSource;</span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">double</span> mSize;</span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">boolean</span> isResource;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="title">ImageSource</span><span class="params">(Context context, String source, <span class="keyword">double</span> width, <span class="keyword">double</span> height)</span> </span>&#123;</span><br><span class="line">    mSource = source;</span><br><span class="line">    mSize = width * height;</span><br><span class="line">    <span class="comment">// Important: we compute the URI here so that we don't need to hold a reference to the context,</span></span><br><span class="line">    <span class="comment">// potentially causing leaks.</span></span><br><span class="line">    mUri = computeUri(context);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// …………</span></span><br><span class="line">  <span class="function"><span class="keyword">private</span> Uri <span class="title">computeUri</span><span class="params">(Context context)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      Uri uri = Uri.parse(mSource);</span><br><span class="line">      <span class="comment">// Verify scheme is set, so that relative uri (used by static resources) are not handled.</span></span><br><span class="line">      <span class="keyword">return</span> uri.getScheme() == <span class="keyword">null</span> ? computeLocalUri(context) : uri;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">      <span class="keyword">return</span> computeLocalUri(context);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="keyword">private</span> Uri <span class="title">computeLocalUri</span><span class="params">(Context context)</span> </span>&#123;</span><br><span class="line">    isResource = <span class="keyword">true</span>;</span><br><span class="line">    <span class="keyword">return</span> ResourceDrawableIdHelper.getInstance().getResourceDrawableUri(context, mSource);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>computeUri</code>实现了对图片路径的解析，注意看这一段代码：</p>
+<blockquote>
+<p>return uri.getScheme() == null ? computeLocalUri(context) : uri;</p>
+</blockquote>
+<p>是不是突然领悟到了什么？是的，对于从文件系统加载的方式，<code>uri.getScheme</code>返回了<code>file</code>，而对于从Asset加载的方式则返回了<code>null</code>。也就是说，对于从文件系统加载的方式，直接解析路径字符串，获取对应的Uri对象即可，对于Asset加载方式，还需要调用<code>computeLocalUri</code>再做处理。</p><p></p><p></p>
+<p>顺便一说，在React Native中，图片默认使用Fresco加载，其Uri规范可见<a href="https://www.fresco-cn.org/docs/supported-uris.html" target="_blank" rel="noopener">支持的URI</a>。</p>
+<h2 id="resourcedrawableidhelperjava">ResourceDrawableIdHelper.java</h2>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ResourceDrawableIdHelper.java</span></span><br><span class="line"><span class="comment">/** Helper class for obtaining information about local images. */</span></span><br><span class="line"><span class="meta">@ThreadSafe</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ResourceDrawableIdHelper</span> </span>&#123;</span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String LOCAL_RESOURCE_SCHEME = <span class="string">"res"</span>;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> Uri <span class="title">getResourceDrawableUri</span><span class="params">(Context context, @Nullable String name)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> resId = getResourceDrawableId(context, name);</span><br><span class="line">    <span class="keyword">return</span> resId &gt; <span class="number">0</span></span><br><span class="line">        ? <span class="keyword">new</span> Uri.Builder().scheme(LOCAL_RESOURCE_SCHEME).path(String.valueOf(resId)).build()</span><br><span class="line">        : Uri.EMPTY;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// …………</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getResourceDrawableId</span><span class="params">(Context context, @Nullable String name)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (name == <span class="keyword">null</span> || name.isEmpty()) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    name = name.toLowerCase().replace(<span class="string">"-"</span>, <span class="string">"_"</span>);</span><br><span class="line">    <span class="comment">// name could be a resource id.</span></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> Integer.parseInt(name);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (NumberFormatException e) &#123;</span><br><span class="line">      <span class="comment">// Do nothing.</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// …………</span></span><br><span class="line">    <span class="keyword">int</span> id = context.getResources().getIdentifier(name, <span class="string">"drawable"</span>, context.getPackageName());</span><br><span class="line">    mResourceDrawableIdMap.put(name, id);</span><br><span class="line">    <span class="keyword">return</span> id;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们知道，通过Asset这种加载方式，传至java端的路径信息只有一个文件名（例如上面提到的：img_poyoo）。仅仅通过文件名如何找到文件呢？两行代码搞定：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">context.getResources().getIdentifier(name, <span class="string">"drawable"</span>, context.getPackageName())</span><br><span class="line">Uri.Builder().scheme(LOCAL_RESOURCE_SCHEME).path(String.valueOf(resId)).build()</span><br></pre></td></tr></table></figure>
+<p>第一行，在Asset下的drawable目录查找指定文件，返回其资源ID。</p><p></p><p></p>
+<p>第二行，根据资源ID构建Uri。</p><p></p><p></p>
+<p>最后，Fresco将根据Uri加载对应的图片文件。</p><p></p><p></p>
+<p>至此，便完成了由js到java的图片路径传递与解析。</p>
+<h1 id="收获">收获</h1>
+<ul>
+<li>从文件系统加载的图片，其路径信息仅是相对于Bundle的路径，因此Bundle的路径将直接影响到图片源文件的路径定位。一旦Bundle路径被恶意篡改，其相关的图片资源将全部失效。</li>
+<li>从Asset加载的图片，其路径信息仅是图片名，连协议头都没有。虽然通过源码分析我们知道js端与java端有配套设计保证其能按照期望执行，但如果单从js端来看就很奇怪，甚至像个BUG。</li>
+<li>为动态换肤方案提供了思路。</li>
+</ul>
+
+                
+
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2020/02/16/react-native-build-from-source/" data-toggle="tooltip" data-placement="top" title="React Native源码构建">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2019/10/06/try-gitbook/" data-toggle="tooltip" data-placement="top" title="GitBook安装与使用">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                <!-- duoshuo Share start -->
+                
+                <!-- 多说 Share end-->
+
+                <!-- 多说评论框 start -->
+                
+                <!-- 多说评论框 end -->
+
+                <!-- disqus comment start -->
+                
+                    <div class="comment">
+                        <div id="disqus_thread" class="disqus-thread"></div>
+                    </div>
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      <aside id="sidebar">
+        <div id="toc" class="toc-article">
+        <strong class="toc-title">Contents</strong>
+        
+          <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#image"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">Image</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#源码分析"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">源码分析</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#imageandroidjs"><span class="toc-nav-number">2.1.</span> <span class="toc-nav-text">Image.android.js</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#resolveassetsourcejs"><span class="toc-nav-number">2.2.</span> <span class="toc-nav-text">resolveAssetSource.js</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#assetsourceresolverjs"><span class="toc-nav-number">2.3.</span> <span class="toc-nav-text">AssetSourceResolver.js</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#reactimagemanagerjava"><span class="toc-nav-number">2.4.</span> <span class="toc-nav-text">ReactImageManager.java</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#reactimageviewjava"><span class="toc-nav-number">2.5.</span> <span class="toc-nav-text">ReactImageView.java</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#imagesourcejava"><span class="toc-nav-number">2.6.</span> <span class="toc-nav-text">ImageSource.java</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#resourcedrawableidhelperjava"><span class="toc-nav-number">2.7.</span> <span class="toc-nav-text">ResourceDrawableIdHelper.java</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#收获"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">收获</span></a></li></ol>
+        
+        </div>
+      </aside>
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#源码分析" title="源码分析">源码分析</a>
+                        
+                          <a class="tag" href="/tags/#react-native" title="react-native">react-native</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="https://zhuanlan.zhihu.com/c_154978159" target="_blank">弱鸡的填坑之旅</a></li>
+                    
+                        <li><a href="https://codyi96.gitbook.io/leetcode/" target="_blank">Leetcode</a></li>
+                    
+                        <li><a href="https://codyi.vercel.app/" target="_blank">vercel镜像站</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- disqus embedded js code start (one page only need to embed once) -->
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = "codyi96";
+    var disqus_identifier = "https://codyi96.github.io/2019/10/10/react-native-image-load/";
+    var disqus_url = "https://codyi96.github.io/2019/10/10/react-native-image-load/";
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<!-- disqus embedded js code start end -->
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: '☄️'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/a-hey-59">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="http://weibo.com/2909212740">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/codyi96">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Codyi96 2020 
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    re-Ported by <a href="http://beantech.org">BeanTech</a> | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://img.shields.io/github/stars/codyi96/codyi96.github.io?style=social" >
+                    </iframe>
+                </p>
+                <p class="copyright text-muted">
+                    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+                    <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://codyi96.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+    <script>
+        var _gaId = 'UA-149875502-1';
+        var _gaDomain = 'auto';
+
+        // Originial
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+        ga('create', _gaId, _gaDomain);
+        ga('send', 'pageview');
+    </script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = 'e03d9cebfdf156f9569ec25fc546af69';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+<!-- Image to hack wechat -->
+<!-- <img src="https://codyi96.github.io/img/icon_wechat.jpeg" width="0" height="0" /> -->
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"left","width":150,"height":300},"mobile":{"show":false},"react":{"opacity":0.7},"log":false});</script></body>
+
+</html>
